@@ -90,3 +90,15 @@ ForestGuard-Pro/
         ├── smoke_net.py     # Hybrid TransUNet Assembly
         ├── attention.py     # CBAM Module Implementation
         └── unet_parts.py    # Decoder Blocks
+
+
+## 👥 Team Members & Roles
+
+| Name | | Responsibilities |
+| :--- | :--- | :--- |
+| **[mohamed ahmed abdelazim ]** | Team Leader | model Building & Implementing TransformerBlock ,smoke_net
+| **[ِAbdelRahman Mohamed Abdelrahman  ]** | |  & `CBAM` Attention modules.
+| ** Mohamed Sameh Farag Mansour | Building `unet_parts` & Training pipeline optimization. |
+| ** Saif Hussam Youssef Al-Khalaily | front end & backend (FastAPI)|
+| ** yahya Zakaria Mazid | Implementing Data Augmentation scripts to solve imbalance. |
+| ** |Mahmoud Abdel Razek Anbar|  | Implementing Data Augmentation scripts to solve imbalance.
