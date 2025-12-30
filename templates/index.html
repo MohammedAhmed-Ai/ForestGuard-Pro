@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ForestGuard Pro | AI Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #00d4ff;
+            --danger: #ff0055;
+            --warning: #ffaa00;
+            --success: #00ffaa;
+            --bg-dark: #0a0e17;
+            --panel: rgba(20, 30, 48, 0.85);
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(circle at 50% 50%, #1a253a 0%, #0a0e17 100%);
+            color: white;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+        }
+
+        /* Layout */
+        .sidebar {
+            width: 80px;
+            background: rgba(0, 0, 0, 0.6);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 20px;
+            z-index: 10;
+        }
+
+        .nav-item {
+            width: 50px; height: 50px; margin-bottom: 20px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            color: #64748b; cursor: pointer; transition: 0.3s; font-size: 22px;
+        }
+        .nav-item.active, .nav-item:hover {
+            background: linear-gradient(135deg, var(--primary), #0055ff);
+            color: white; box-shadow: 0 0 15px var(--primary);
+        }
+
+        .main-content { flex: 1; padding: 30px; display: flex; flex-direction: column; }
+
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
+        .title h1 { margin: 0; font-size: 32px; letter-spacing: 2px; }
+        .title span { color: var(--primary); }
+
+        .status-badge {
+            background: rgba(0, 255, 170, 0.1); color: var(--success);
+            padding: 8px 20px; border-radius: 20px; border: 1px solid var(--success);
+            font-weight: 700; display: flex; align-items: center; gap: 10px; letter-spacing: 1px;
+        }
+        .status-dot { width: 10px; height: 10px; background: var(--success); border-radius: 50%; box-shadow: 0 0 10px var(--success); }
+
+        /* Dashboard Grid */
+        .grid-container { display: grid; grid-template-columns: 3fr 1fr; gap: 20px; flex: 1; min-height: 0; }
+
+        /* Viewer Panel */
+        .viewer-panel {
+            background: var(--panel); border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px; position: relative; overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        #displayMedia { max-width: 100%; max-height: 100%; border-radius: 8px; display: none; }
+        .placeholder { text-align: center; color: rgba(255, 255, 255, 0.3); }
+
+        /* Controls Panel */
+        .controls-panel { display: flex; flex-direction: column; gap: 20px; }
+        .control-card { background: var(--panel); padding: 20px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.05); }
+
+        .metric-box { margin-top: 15px; background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 10px; }
+        .metric-head { display: flex; justify-content: space-between; font-size: 14px; color: #ccc; margin-bottom: 5px; }
+        .metric-val { font-size: 28px; font-weight: bold; font-family: 'Rajdhani'; }
+        
+        .progress-bg { height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; margin-top: 5px; overflow: hidden; }
+        .progress-fill { height: 100%; width: 0%; transition: width 0.3s ease; }
+
+        .btn-action {
+            width: 100%; padding: 15px; border-radius: 10px; border: none; font-family: 'Rajdhani'; font-weight: bold; font-size: 16px;
+            cursor: pointer; transition: 0.3s; color: white; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn-upload { background: rgba(255,255,255,0.1); border: 1px dashed rgba(255,255,255,0.3); }
+        .btn-upload:hover { background: rgba(0, 212, 255, 0.1); border-color: var(--primary); color: var(--primary); }
+        
+        .btn-stop { background: var(--danger); box-shadow: 0 5px 15px rgba(255,0,85,0.3); display: none; }
+        .btn-stop:hover { background: #d40045; }
+
+        .logs-box {
+            font-family: 'Courier New', monospace; font-size: 11px; color: var(--primary);
+            height: 100px; overflow-y: auto; margin-top: auto; opacity: 0.7;
+        }
+
+        /* Animations */
+        @keyframes scan { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }
+        .scan-line { position: absolute; width: 100%; height: 2px; background: var(--primary); box-shadow: 0 0 15px var(--primary); opacity: 0.6; animation: scan 3s infinite linear; display: none; pointer-events: none; }
+
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="nav-item active" onclick="switchMode('image')"><i class="fas fa-image"></i></div>
+        <div class="nav-item" onclick="switchMode('video')"><i class="fas fa-video"></i></div>
+        <div class="nav-item" style="margin-top: auto;"><i class="fas fa-cog"></i></div>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <div class="title"><h1>FOREST<span>GUARD</span> PRO</h1></div>
+            <div class="status-badge" id="systemStatus"><div class="status-dot"></div> <span id="statusText">SYSTEM READY</span></div>
+        </div>
+
+        <div class="grid-container">
+            <div class="viewer-panel" id="dropZone">
+                <div class="scan-line" id="scanLine"></div>
+                <img id="displayMedia">
+                <div class="placeholder" id="placeholder">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 48px; margin-bottom: 15px;"></i>
+                    <h3 id="modeTitle">UPLOAD IMAGE</h3>
+                    <p>Drag & Drop or Browse</p>
+                </div>
+                <input type="file" id="fileInput" hidden>
+            </div>
+
+            <div class="controls-panel">
+                <div class="control-card">
+                    <h3 style="margin-top: 0; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">LIVE METRICS</h3>
+                    
+                    <div class="metric-box">
+                        <div class="metric-head"><span><i class="fas fa-fire" style="color: var(--danger);"></i> FIRE LEVEL</span></div>
+                        <div class="metric-val" id="fireVal" style="color: var(--danger);">0.00%</div>
+                        <div class="progress-bg"><div class="progress-fill" id="fireBar" style="background: var(--danger);"></div></div>
+                    </div>
+
+                    <div class="metric-box">
+                        <div class="metric-head"><span><i class="fas fa-smog" style="color: #ccc;"></i> SMOKE LEVEL</span></div>
+                        <div class="metric-val" id="smokeVal">0.00%</div>
+                        <div class="progress-bg"><div class="progress-fill" id="smokeBar" style="background: #ccc;"></div></div>
+                    </div>
+                </div>
+
+                <div class="control-card">
+                    <button class="btn-action btn-upload" id="uploadBtn" onclick="document.getElementById('fileInput').click()">
+                        <i class="fas fa-folder-open"></i> UPLOAD FILE
+                    </button>
+                    <button class="btn-action btn-stop" id="stopBtn" onclick="stopProcessing()">
+                        <i class="fas fa-stop-circle"></i> STOP ANALYSIS
+                    </button>
+                    
+                    <div class="logs-box" id="logs">
+                        > System Initialized...<br>
+                        > Waiting for input...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentMode = 'image';
+        let abortController = null; // To stop video stream
+
+        const fileInput = document.getElementById('fileInput');
+        const displayMedia = document.getElementById('displayMedia');
+        const placeholder = document.getElementById('placeholder');
+        const scanLine = document.getElementById('scanLine');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const stopBtn = document.getElementById('stopBtn');
+
+        function switchMode(mode) {
+            currentMode = mode;
+            stopProcessing(); // Reset everything
+            
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            document.getElementById('modeTitle').innerText = mode === 'image' ? "UPLOAD IMAGE" : "UPLOAD VIDEO";
+            fileInput.accept = mode === 'image' ? "image/*" : "video/*";
+            log(`Switched to ${mode.toUpperCase()} mode.`);
+        }
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) startAnalysis(e.target.files[0]);
+        });
+
+        async function startAnalysis(file) {
+            stopProcessing(); // Clean up prev run
+            
+            placeholder.style.display = 'none';
+            displayMedia.style.display = 'block';
+            scanLine.style.display = 'block';
+            
+            // Show temp preview
+            // displayMedia.src = URL.createObjectURL(file); 
+            
+            log(`Processing: ${file.name}`);
+
+            if (currentMode === 'image') {
+                processImage(file);
+            } else {
+                processVideo(file);
+            }
+        }
+
+        async function processImage(file) {
+            const formData = new FormData();
+            formData.append("file", file);
+
+            try {
+                const res = await fetch('/predict_image', { method: 'POST', body: formData });
+                const data = await res.json();
+                
+                displayMedia.src = "data:image/png;base64," + data.image_data;
+                updateDashboard(data.fire_ratio, data.smoke_ratio, data.alert_level);
+                log("Analysis Complete.");
+                scanLine.style.display = 'none';
+            } catch (err) { log("Error: " + err); }
+        }
+
+        async function processVideo(file) {
+            uploadBtn.style.display = 'none';
+            stopBtn.style.display = 'flex';
+            
+            log("Uploading video...");
+            
+            // 1. Upload Video First
+            const formData = new FormData();
+            formData.append("file", file);
+            
+            try {
+                const uploadRes = await fetch('/upload_video', { method: 'POST', body: formData });
+                const uploadData = await uploadRes.json();
+                const videoPath = uploadData.video_path;
+                
+                log("Starting Real-time Stream...");
+                
+                // 2. Consume Data Stream (Stream Reading)
+                abortController = new AbortController();
+                const response = await fetch(`/stream_video?path=${videoPath}`, { 
+                    signal: abortController.signal 
+                });
+                
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+                    
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    
+                    // Process complete lines
+                    for (let i = 0; i < lines.length - 1; i++) {
+                        const line = lines[i].trim();
+                        if (line) {
+                            try {
+                                const data = JSON.parse(line);
+                                if (data.status === "FINISHED") {
+                                    stopProcessing();
+                                    return;
+                                }
+                                
+                                // Update Image
+                                displayMedia.src = "data:image/jpeg;base64," + data.image;
+                                // Update Stats
+                                updateDashboard(data.fire, data.smoke, data.status);
+                                
+                            } catch (e) { console.error("Parse error", e); }
+                        }
+                    }
+                    buffer = lines[lines.length - 1]; // Keep incomplete line
+                }
+
+            } catch (err) {
+                if (err.name === 'AbortError') {
+                    log("Stream stopped by user.");
+                } else {
+                    log("Error: " + err);
+                }
+            }
+        }
+
+        function stopProcessing() {
+            if (abortController) {
+                abortController.abort();
+                abortController = null;
+            }
+            
+            uploadBtn.style.display = 'flex';
+            stopBtn.style.display = 'none';
+            scanLine.style.display = 'none';
+            
+            // Reset UI if needed, but keeping last frame is usually better
+            document.getElementById('systemStatus').style.borderColor = "var(--success)";
+            document.getElementById('statusText').innerText = "SYSTEM READY";
+        }
+
+        function updateDashboard(fire, smoke, status) {
+            // Update Numbers
+            document.getElementById('fireVal').innerText = fire.toFixed(2) + "%";
+            document.getElementById('fireBar').style.width = Math.min(fire, 100) + "%";
+            
+            document.getElementById('smokeVal').innerText = smoke.toFixed(2) + "%";
+            document.getElementById('smokeBar').style.width = Math.min(smoke, 100) + "%";
+
+            // Update Badge
+            const badge = document.getElementById('systemStatus');
+            const dot = document.querySelector('.status-dot');
+            const txt = document.getElementById('statusText');
+            
+            if (status.includes("FIRE")) {
+                badge.style.borderColor = "var(--danger)";
+                badge.style.color = "var(--danger)";
+                dot.style.background = "var(--danger)";
+                dot.style.boxShadow = "0 0 10px var(--danger)";
+                txt.innerText = "CRITICAL ALERT";
+            } else if (status.includes("SMOKE")) {
+                badge.style.borderColor = "var(--warning)";
+                badge.style.color = "var(--warning)";
+                dot.style.background = "var(--warning)";
+                dot.style.boxShadow = "0 0 10px var(--warning)";
+                txt.innerText = "SMOKE DETECTED";
+            } else {
+                badge.style.borderColor = "var(--success)";
+                badge.style.color = "var(--success)";
+                dot.style.background = "var(--success)";
+                dot.style.boxShadow = "0 0 10px var(--success)";
+                txt.innerText = "AREA SECURE";
+            }
+        }
+
+        function log(msg) {
+            const logs = document.getElementById('logs');
+            logs.innerHTML += `> ${msg}<br>`;
+            logs.scrollTop = logs.scrollHeight;
+        }
+    </script>
+</body>
+</html>

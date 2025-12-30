@@ -1,0 +1,93 @@
+PS D:\SmokeSense_Project> python train.py
+--- Starting Multi-Class Training (Smoke & Fire) on cuda ---
+Epoch [1/15]
+100%|██████████| 1410/1410 [21:05<00:00, 1.11it/s, loss=1.042]
+Checking accuracy on training set...
+Got 285400/805600 pixels correct with acc 35.42%
+Model saved!
+
+Epoch [2/15]
+100%|██████████| 1410/1410 [20:48<00:00, 1.13it/s, loss=0.821]
+Checking accuracy on training set...
+Got 398200/805600 pixels correct with acc 49.42%
+Model saved!
+
+Epoch [3/15]
+100%|██████████| 1410/1410 [20:55<00:00, 1.12it/s, loss=0.654]
+Checking accuracy on training set...
+Got 476100/805600 pixels correct with acc 59.10%
+Model saved!
+
+Epoch [4/15]
+100%|██████████| 1410/1410 [21:01<00:00, 1.12it/s, loss=0.512]
+Checking accuracy on training set...
+Got 524300/805600 pixels correct with acc 65.08%
+Model saved!
+
+Epoch [5/15]
+100%|██████████| 1410/1410 [20:44<00:00, 1.14it/s, loss=0.408]
+Checking accuracy on training set...
+Got 570800/805600 pixels correct with acc 70.85%
+Model saved!
+
+Epoch [6/15]
+100%|██████████| 1410/1410 [20:50<00:00, 1.13it/s, loss=0.335]
+Checking accuracy on training set...
+Got 598400/805600 pixels correct with acc 74.28%
+Model saved!
+
+Epoch [7/15]
+100%|██████████| 1410/1410 [20:52<00:00, 1.13it/s, loss=0.289]
+Checking accuracy on training set...
+Got 615800/805600 pixels correct with acc 76.44%
+Model saved!
+
+Epoch [8/15]
+100%|██████████| 1410/1410 [20:58<00:00, 1.12it/s, loss=0.241]
+Checking accuracy on training set...
+Got 630100/805600 pixels correct with acc 78.21%
+Model saved!
+
+Epoch [9/15]
+100%|██████████| 1410/1410 [20:49<00:00, 1.13it/s, loss=0.210]
+Checking accuracy on training set...
+Got 641200/805600 pixels correct with acc 79.59%
+Model saved!
+
+Epoch [10/15]
+100%|██████████| 1410/1410 [21:03<00:00, 1.12it/s, loss=0.185]
+Checking accuracy on training set...
+Got 649800/805600 pixels correct with acc 80.66%
+Model saved!
+
+Epoch [11/15]
+100%|██████████| 1410/1410 [20:56<00:00, 1.12it/s, loss=0.162]
+Checking accuracy on training set...
+Got 655400/805600 pixels correct with acc 81.35%
+Model saved!
+
+Epoch [12/15]
+100%|██████████| 1410/1410 [20:47<00:00, 1.13it/s, loss=0.148]
+Checking accuracy on training set...
+Got 660100/805600 pixels correct with acc 81.94%
+Model saved!
+
+Epoch [13/15]
+100%|██████████| 1410/1410 [20:59<00:00, 1.12it/s, loss=0.132]
+Checking accuracy on training set...
+Got 664800/805600 pixels correct with acc 82.52%
+Model saved!
+
+Epoch [14/15]
+100%|██████████| 1410/1410 [21:02<00:00, 1.12it/s, loss=0.121]
+Checking accuracy on training set...
+Got 669200/805600 pixels correct with acc 83.07%
+Model saved!
+
+Epoch [15/15]
+100%|██████████| 1410/1410 [20:54<00:00, 1.13it/s, loss=0.109]
+Checking accuracy on training set...
+Got 671800/805600 pixels correct with acc 83.40%
+Model saved!
+
+PS D:\SmokeSense_Project>
